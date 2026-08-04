@@ -38,7 +38,7 @@ def criar_chunks(documentos):
   return chunks
 
 def vetorizar_chunks(chunks):
-  db = Chroma.from_documents(chunks, GoogleGenerativeAIEmbeddings(model="gemini-embedding-001", task_type="retrieval_document"), persist_directory="db")
+  db = Chroma.from_documents(chunks, GoogleGenerativeAIEmbeddings(model="gemini-embedding-2", task_type="RETRIEVAL_DOCUMENT"), persist_directory="db")
   print("Chunks vetorizados e armazenados no banco de dados")
 
 criar_db()
