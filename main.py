@@ -15,9 +15,7 @@ Com base nessas informações:
 {base_conhecimento}
 """
 
-def perguntar():
-  pergunta = input("Escreva a sua pergunta: ")
-
+def perguntar(pergunta):
   # carregar o banco de dados
 
   funcao_embedding = GoogleGenerativeAIEmbeddings(model="gemini-embedding-2", task_type="QUESTION_ANSWERING")
@@ -44,6 +42,4 @@ def perguntar():
   modelo = ChatGoogleGenerativeAI(model="gemini-3.6-flash")
   texto_resposta = modelo.invoke(prompt).content[0]["text"]
 
-  print(f"\n\nResposta da IA: {texto_resposta}")
-
-perguntar()
+  return base_conhecimento, texto_resposta

@@ -12,3 +12,6 @@ pypdf
 # modificacoes que eu fiz
 langchain-google-genai
 langchain_core
+
+# construcao de um frontend simples
+streamlit
