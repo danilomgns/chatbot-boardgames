@@ -44,7 +44,6 @@ def perguntar():
   modelo = ChatGoogleGenerativeAI(model="gemini-3.6-flash")
   texto_resposta = modelo.invoke(prompt).content[0]["text"]
 
-  print(f"\n\nResultados:\n\n{resultados}")
   print(f"\n\nResposta da IA: {texto_resposta}")
 
 perguntar()
