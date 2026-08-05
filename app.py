@@ -1,4 +1,5 @@
-import app as st
+import streamlit as st
+import time
 from main import perguntar
 
 
@@ -17,12 +18,27 @@ def app():
 
     mensagens.append({"usuario": "user", "texto": mensagem_usuario})
 
-    base_conhecimento, texto_resposta = perguntar(mensagem_usuario)
+    carregar_mensagens(mensagens)
 
-    mensagens.append({"usuario": "assistant", "texto": base_conhecimento})
+    with st.status("Perguntando para a AI ..."):
+      base_conhecimento, texto_resposta = perguntar(mensagem_usuario)
+
+    # mensagens.append({"usuario": "assistant", "texto": base_conhecimento}) # para visualizar os chunks retornados pela base vetorizada
     mensagens.append({"usuario": "ai", "texto": texto_resposta})
 
-    for mensagem in mensagens:
+    carregar_mensagens(mensagens[-1:])
+
+def stream_resposta(resposta):
+  for palavra in resposta.split(" "):
+    yield palavra + " "
+    time.sleep(0.02)
+    
+def carregar_mensagens(mensagens):
+  for mensagem in mensagens:
+    if mensagem["usuario"] == "ai":
+      with st.chat_message(mensagem["usuario"]):
+                st.write_stream(stream_resposta(mensagem["texto"]))
+    else:
       with st.chat_message(mensagem["usuario"]):
             st.write(mensagem["texto"])
 
