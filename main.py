@@ -39,7 +39,7 @@ def perguntar(pergunta):
 
   # chamar o modelo de llm
 
-  modelo = ChatGoogleGenerativeAI(model="gemini-3.6-flash")
+  modelo = ChatGoogleGenerativeAI(model="gemini-3.5-flash")
   texto_resposta = modelo.invoke(prompt).content[0]["text"]
 
   return base_conhecimento, texto_resposta

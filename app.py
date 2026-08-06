@@ -26,16 +26,16 @@ def app():
     # mensagens.append({"usuario": "assistant", "texto": base_conhecimento}) # para visualizar os chunks retornados pela base vetorizada
     mensagens.append({"usuario": "ai", "texto": texto_resposta})
 
-    carregar_mensagens(mensagens[-1:])
+    carregar_mensagens(mensagens[-1:], stream=True)
 
 def stream_resposta(resposta):
   for palavra in resposta.split(" "):
     yield palavra + " "
     time.sleep(0.02)
-    
-def carregar_mensagens(mensagens):
+
+def carregar_mensagens(mensagens, stream=False):
   for mensagem in mensagens:
-    if mensagem["usuario"] == "ai":
+    if mensagem["usuario"] == "ai" and stream == True:
       with st.chat_message(mensagem["usuario"]):
                 st.write_stream(stream_resposta(mensagem["texto"]))
     else:
