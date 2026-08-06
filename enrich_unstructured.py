@@ -1,0 +1,133 @@
+import json
+import mimetypes
+import os
+import time
+
+from unstructured_client import UnstructuredClient
+from unstructured_client.models.operations import CreateJobRequest, DownloadJobOutputRequest
+from unstructured_client.models.shared import BodyCreateJob, InputFiles
+
+from dotenv import load_dotenv
+
+# Carrega as variáveis do arquivo .env
+load_dotenv()
+
+INPUT_DIR = "C:/Users/USER/Documents/Code/chatbot-boardgames/documentos"
+OUTPUT_DIR = "C:/Users/USER/Documents/Code/chatbot-boardgames/documentos_json"
+
+client = UnstructuredClient(
+    api_key_auth=os.getenv("UNSTRUCTURED_API_KEY"),
+    server_url=os.getenv("UNSTRUCTURED_API_URL")
+)
+
+# Step 1: Create the job.
+input_files = []
+for filename in os.listdir(INPUT_DIR):
+    full_path = os.path.join(INPUT_DIR, filename)
+    if not os.path.isfile(full_path):
+        continue
+    content_type, _ = mimetypes.guess_type(full_path)
+    input_files.append(
+        InputFiles(
+            content=open(full_path, "rb"),
+            file_name=filename,
+            content_type=content_type or "application/octet-stream"
+        )
+    )
+
+response = client.jobs.create_job(
+    request=CreateJobRequest(
+        body_create_job=BodyCreateJob(
+            request_data=json.dumps({
+                "job_nodes": [
+                    {
+                        "name": "Partitioner",
+                        "type": "partition",
+                        "subtype": "unstructured_api",
+                        "settings": {
+                            "strategy": "hi_res",
+                            "ocr_languages": ["por"],
+                            "encoding": "utf-8",
+                            "extract_image_block_types": ["image", "table"]
+                        }
+                    },
+                    {
+                        "name": "Generative OCR",
+                        "type": "prompter",
+                        "subtype": "openai_ocr",
+                        "settings": {
+                            "provider_type": "openai",
+                            "model": "gpt-5-mini"
+                        }
+                    },
+                    {
+                        "name": "Image Description",
+                        "type": "prompter",
+                        "subtype": "openai_image_description",
+                        "settings": {
+                            "provider_type": "openai",
+                            "model": "gpt-5-mini"
+                        }
+                    },
+                    {
+                        "name": "Table to HTML",
+                        "type": "prompter",
+                        "subtype": "twopass_table2html"
+                    },
+                    {
+                        "name": "Table Description",
+                        "type": "prompter",
+                        "subtype": "openai_table_description",
+                        "settings": {
+                            "provider_type": "openai",
+                            "model": "gpt-5-mini"
+                        }
+                    },
+                    {
+                        "name": "NER",
+                        "type": "prompter",
+                        "subtype": "openai_ner",
+                        "settings": {
+                            "provider_type": "openai",
+                            "model": "gpt-5-mini"
+                        }
+                    }
+                ]
+            }),
+            input_files=input_files
+        )
+    )
+)
+
+job_id = response.job_information.id
+print(f"Job ID: {job_id}")
+
+# Step 2: Poll until the job completes.
+while True:
+    response = client.jobs.get_job(request={"job_id": job_id})
+    job_info = response.job_information
+    status = job_info.status
+
+    print(f"Job status: {status.value}")
+
+    if status == "COMPLETED":
+        print("Job completed.")
+        break
+    elif status in ("FAILED", "STOPPED"):
+        raise RuntimeError(f"Job did not complete successfully: {status}")
+
+    time.sleep(10)
+
+output_node_file_ids = [f.file_id for f in (job_info.output_node_files or [])]
+
+# Step 3: Download the job output.
+os.makedirs(OUTPUT_DIR, exist_ok=True)
+
+for file_id in output_node_file_ids:
+    response = client.jobs.download_job_output(
+        request=DownloadJobOutputRequest(job_id=job_id, file_id=file_id)
+    )
+    output_path = os.path.join(OUTPUT_DIR, f"{file_id}.json")
+    with open(output_path, "w") as f:
+        json.dump(response.any, f, indent=4)
+    print(f"Saved: {output_path}")

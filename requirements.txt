@@ -15,3 +15,6 @@ langchain_core
 
 # construcao de um frontend simples
 streamlit
+
+# melhoria na leitura de documentos
+unstructured-client
