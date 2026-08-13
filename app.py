@@ -5,7 +5,7 @@ from main import perguntar
 
 def app():
   st.header("Board games Chatbot", divider=True)
-  st.write('Jogos disponíveis: cascadia e coup')
+  st.write('Jogos disponíveis: Cascadia, Coup, Cangaço e Trio')
 
   mensagem_usuario = st.chat_input("Digite aqui a sua mensagem")
 
@@ -24,6 +24,9 @@ def app():
       base_conhecimento, texto_resposta = perguntar(mensagem_usuario)
 
     # mensagens.append({"usuario": "assistant", "texto": base_conhecimento}) # para visualizar os chunks retornados pela base vetorizada
+
+    # carregar_mensagens(mensagens)
+
     mensagens.append({"usuario": "ai", "texto": texto_resposta})
 
     carregar_mensagens(mensagens[-1:], stream=True)

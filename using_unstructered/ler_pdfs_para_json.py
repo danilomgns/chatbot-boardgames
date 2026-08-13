@@ -13,7 +13,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 INPUT_DIR = "C:/Users/USER/Documents/Code/chatbot-boardgames/documentos"
-OUTPUT_DIR = "C:/Users/USER/Documents/Code/chatbot-boardgames/documentos_json"
+OUTPUT_DIR = "C:/Users/USER/Documents/Code/chatbot-boardgames/using_unstructered/documentos_json"
 
 client = UnstructuredClient(
     api_key_auth=os.getenv("UNSTRUCTURED_API_KEY"),
